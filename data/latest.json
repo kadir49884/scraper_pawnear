@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-11-22T02:16:06Z",
+  "toplam": 2,
+  "kedi": [
+    {
+      "ilan_turu": "Kayıp",
+      "baslik": "bodrum21.11.2025 tarihinde konacık çırkan mah konacık ana okulu önünde kaybolmuştur",
+      "aciklama": "çırkan  yahya kemal beyatlı sokak dörtyol ağzndaki evden kaybolmuştur saat 18.30-1900 akşam arası görenlerin 0505-5262862 numaraya bilgi verilmesini rica ederiz",
+      "konum": "Muğla / Milas",
+      "tarih1": "2 Saat Önce",
+      "tarih2": "2025-11-22T00:16:05Z",
+      "kategori": "Kedi",
+      "gorsel": "https://www.gorenduyan.com/images/ad/2025/11/22/202511220016-23372-46695.jpg",
+      "link": "https://www.gorenduyan.com/bodrum-konacik-cirkan-mah-konacik-ana-okulu-onunde-kaybolmustur-21085",
+      "scraped_at": "2025-11-22T02:16:05Z"
+    }
+  ],
+  "kopek": [
+    {
+      "ilan_turu": "Kayıp",
+      "baslik": "Köpeğim zeyna kayboldu acil aranıyor",
+      "aciklama": "Köpeğim zeyna kocaeli körfez ilimtepe mahallesinden kaybolmuştur lütfen yardımınıza ihtiyacım var",
+      "konum": "Kocaeli / Körfez",
+      "tarih1": "12 Saat Önce",
+      "tarih2": "2025-11-21T14:16:06Z",
+      "kategori": "Köpek",
+      "gorsel": "https://www.gorenduyan.com/images/ad/2025/11/21/202511211405-23370-36104.jpg",
+      "link": "https://www.gorenduyan.com/kopegim-zeyna-kayboldu-acil-araniyor-21084",
+      "scraped_at": "2025-11-22T02:16:06Z"
+    }
+  ]
+}

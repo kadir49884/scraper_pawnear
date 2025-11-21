@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Test files - local scraper sonuçları
+kedi_ilanlari_*.json
+kopek_ilanlari_*.json
+sonuclar_*.json
+
+# data/ klasörü GitHub Actions tarafından yönetiliyor
+# .gitignore'dan hariç tutuldu (commit edilecek)
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
