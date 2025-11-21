@@ -216,39 +216,18 @@ def main():
     # data/ klasörü oluştur
     os.makedirs('data', exist_ok=True)
     
-    # Sonuçları kaydet
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # Tüm ilanları tek listede birleştir (kedi + köpek)
+    tum_ilanlar = kedi_ilanlari + kopek_ilanlari
     
-    # Güncel ilanlar (latest)
-    sonuc = {
-        'timestamp': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'toplam': toplam,
-        'kedi': kedi_ilanlari,
-        'kopek': kopek_ilanlari
-    }
+    # Tek dosyaya kaydet - sadece ilan listesi
+    with open('data/ilanlar.json', 'w', encoding='utf-8') as f:
+        json.dump(tum_ilanlar, f, ensure_ascii=False, indent=2)
     
-    with open('data/latest.json', 'w', encoding='utf-8') as f:
-        json.dump(sonuc, f, ensure_ascii=False, indent=2)
+    print(f"\n[OK] Sonuclar 'data/ilanlar.json' dosyasina kaydedildi!")
+    print(f"   - Toplam {len(tum_ilanlar)} ilan")
+    print(f"   - {len(kedi_ilanlari)} kedi + {len(kopek_ilanlari)} kopek")
     
-    # Tarihli yedek
-    with open(f'data/{timestamp}.json', 'w', encoding='utf-8') as f:
-        json.dump(sonuc, f, ensure_ascii=False, indent=2)
-    
-    # Sadece kedi
-    with open('data/kedi_latest.json', 'w', encoding='utf-8') as f:
-        json.dump(kedi_ilanlari, f, ensure_ascii=False, indent=2)
-    
-    # Sadece köpek
-    with open('data/kopek_latest.json', 'w', encoding='utf-8') as f:
-        json.dump(kopek_ilanlari, f, ensure_ascii=False, indent=2)
-    
-    print(f"\n[OK] Sonuclar 'data/' klasorune kaydedildi!")
-    print(f"   - data/latest.json")
-    print(f"   - data/kedi_latest.json")
-    print(f"   - data/kopek_latest.json")
-    print(f"   - data/{timestamp}.json")
-    
-    return sonuc
+    return tum_ilanlar
 
 if __name__ == "__main__":
     main()
