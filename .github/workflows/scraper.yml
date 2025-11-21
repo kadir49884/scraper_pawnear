@@ -45,9 +45,11 @@ jobs:
     - name: Send Telegram notification
       if: success()
       run: |
-        # JSON dosyasını doğrudan gönder
-        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument" \
-          -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -F document=@data/ilanlar.json \
-          -F caption=""
+        # JSON içeriğini oku ve text olarak gönder
+        JSON_CONTENT=$(cat data/ilanlar.json)
+        
+        # Telegram'a text mesajı olarak gönder
+        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d "{\"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\", \"text\": $(jq -Rs . data/ilanlar.json)}"
 
