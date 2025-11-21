@@ -36,7 +36,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add data/*.json
+        git add data/ilanlar.json
         git diff --quiet && git diff --staged --quiet || git commit -m "🤖 Günlük ilan taraması - $(date +'%Y-%m-%d %H:%M')"
         git push
       env:
@@ -46,9 +46,9 @@ jobs:
       if: success()
       run: |
         # JSON dosyasından bilgileri çek
-        TOPLAM=$(jq -r '.toplam' data/latest.json)
-        KEDI=$(jq -r '.kedi | length' data/latest.json)
-        KOPEK=$(jq -r '.kopek | length' data/latest.json)
+        TOPLAM=$(jq -r 'length' data/ilanlar.json)
+        KEDI=$(jq -r '[.[] | select(.kategori=="Kedi")] | length' data/ilanlar.json)
+        KOPEK=$(jq -r '[.[] | select(.kategori=="Köpek")] | length' data/ilanlar.json)
         TARIH=$(date +'%Y-%m-%d %H:%M')
         
         # Mesaj hazırla
