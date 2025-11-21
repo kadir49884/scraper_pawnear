@@ -178,8 +178,7 @@ def ilanlari_cek(kategori_url, kategori_adi):
                 "tarih2": goreli_tarih_hesapla(ilan['tarih']),
                 "kategori": kategori_adi,
                 "gorsel": ilan['gorsel'] if ilan['gorsel'] else "",
-                "link": ilan['link'] if ilan['link'] else "",
-                "scraped_at": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+                "link": ilan['link'] if ilan['link'] else ""
             }
             
             sonuc_ilanlar.append(ilan_formati)
