@@ -45,26 +45,9 @@ jobs:
     - name: Send Telegram notification
       if: success()
       run: |
-        # JSON dosyasından bilgileri çek
-        TOPLAM=$(jq -r 'length' data/ilanlar.json)
-        KEDI=$(jq -r '[.[] | select(.kategori=="Kedi")] | length' data/ilanlar.json)
-        KOPEK=$(jq -r '[.[] | select(.kategori=="Köpek")] | length' data/ilanlar.json)
-        TARIH=$(date +'%Y-%m-%d %H:%M')
-        
-        # Mesaj hazırla
-        MESSAGE="🤖 *Gören Duyan Scraper*%0A%0A"
-        MESSAGE+="✅ Tarama tamamlandı!%0A%0A"
-        MESSAGE+="📊 *Sonuçlar:*%0A"
-        MESSAGE+="• Toplam: *${TOPLAM}* ilan%0A"
-        MESSAGE+="• 🐱 Kedi: *${KEDI}*%0A"
-        MESSAGE+="• 🐕 Köpek: *${KOPEK}*%0A%0A"
-        MESSAGE+="🕐 Tarih: ${TARIH}%0A%0A"
-        MESSAGE+="🔗 [Sonuçları Görüntüle](https://github.com/${{ github.repository }}/tree/main/data)"
-        
-        # Telegram'a gönder
-        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d text="${MESSAGE}" \
-          -d parse_mode="Markdown" \
-          -d disable_web_page_preview=true
+        # JSON dosyasını doğrudan gönder
+        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument" \
+          -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -F document=@data/ilanlar.json \
+          -F caption=""
 
