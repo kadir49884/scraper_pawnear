@@ -2,12 +2,13 @@
 
 **Otomatik kayıp kedi & köpek ilanı takip sistemi**
 
-[![Günlük İlan Scraper](https://github.com/USERNAME/goren-duyan-scraper/actions/workflows/scraper.yml/badge.svg)](https://github.com/USERNAME/goren-duyan-scraper/actions/workflows/scraper.yml)
+[![Günlük İlan Scraper](https://github.com/kadir49884/scraper_pawnear/actions/workflows/scraper.yml/badge.svg)](https://github.com/kadir49884/scraper_pawnear/actions/workflows/scraper.yml)
 
 ## 🎯 Özellikler
 
 ✅ **GitHub Actions** ile tamamen ücretsiz  
 ✅ **Günlük otomatik tarama** (her gün 12:00 TR)  
+✅ **Telegram bildirimi** 📱  
 ✅ **Son 24 saat filtreleme**  
 ✅ **Duplicate temizleme**  
 ✅ **2 tarih formatı** (Göreceli + ISO 8601)  
@@ -17,29 +18,44 @@
 
 ---
 
-## 🚀 Hızlı Başlangıç
+## 🔔 Telegram Bildirimi Kurulumu
 
-### 1. Repository Oluştur
-```bash
-git init
-git add .
-git commit -m "İlk commit"
-git branch -M main
-git remote add origin https://github.com/USERNAME/goren-duyan-scraper.git
-git push -u origin main
-```
+### 1️⃣ Telegram Bot Oluştur
 
-### 2. Actions Aktifleştir
-1. Repository → **Actions** tab
-2. "Enable workflows" tıkla
-3. ✅ Tamam!
+1. [@BotFather](https://t.me/BotFather)'a git
+2. `/newbot` komutunu gönder
+3. Bot adı ve username belirle
+4. **Bot Token'ı kopyala**
 
-### 3. Manuel Test
-1. Actions → "Günlük İlan Scraper"
-2. **Run workflow** → Run workflow
-3. ✅ Hemen çalışır!
+### 2️⃣ Chat ID Bul
 
-**Detaylı kurulum:** [`GITHUB_ACTIONS_KURULUM.md`](GITHUB_ACTIONS_KURULUM.md)
+1. Bot'una mesaj gönder
+2. Tarayıcıda aç:
+   ```
+   https://api.telegram.org/bot<TOKEN>/getUpdates
+   ```
+3. `"chat":{"id":` kısmından **Chat ID**'yi kopyala
+
+### 3️⃣ GitHub Secrets Ekle
+
+1. Repository → **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret** tıkla
+3. İki secret ekle:
+
+   **İlk Secret:**
+   - Name: `TELEGRAM_BOT_TOKEN`
+   - Secret: Bot token'ınız (örn: `123456789:ABCdefGHI...`)
+   
+   **İkinci Secret:**
+   - Name: `TELEGRAM_CHAT_ID`
+   - Secret: Chat ID'niz (örn: `123456789`)
+
+4. **Add secret** tıkla
+
+### 4️⃣ Test Et
+
+1. Actions → "Günlük İlan Scraper" → **Run workflow**
+2. ✅ Telegram'a bildirim gelecek!
 
 ---
 
@@ -49,16 +65,16 @@ git push -u origin main
 ```
 data/
 ├── latest.json           → Tüm ilanlar (son tarama)
-├── kedi_latest.json      → Sadece kedi ilanları
-├── kopek_latest.json     → Sadece köpek ilanları
+├── kedi_latest.json      → Sadece kedi
+├── kopek_latest.json     → Sadece köpek
 └── 20251122_120000.json  → Tarihli yedek
 ```
 
-### URL Erişimi
+### 🌐 URL Erişimi
 ```
-https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/latest.json
-https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/kedi_latest.json
-https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/kopek_latest.json
+https://raw.githubusercontent.com/kadir49884/scraper_pawnear/main/data/latest.json
+https://raw.githubusercontent.com/kadir49884/scraper_pawnear/main/data/kedi_latest.json
+https://raw.githubusercontent.com/kadir49884/scraper_pawnear/main/data/kopek_latest.json
 ```
 
 ### JSON Formatı
@@ -88,30 +104,51 @@ https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/kopek_l
 
 ---
 
-## 📱 Kullanım Örnekleri
+## 📱 Telegram Bildirimi Örneği
 
-### JavaScript
-```javascript
-fetch('https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/latest.json')
-  .then(res => res.json())
-  .then(data => console.log(data));
 ```
+🤖 Gören Duyan Scraper
 
-### Python
-```python
-import requests
-data = requests.get('https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/latest.json').json()
-print(f"Toplam: {data['toplam']} ilan")
-```
+✅ Tarama tamamlandı!
 
-### cURL
-```bash
-curl https://raw.githubusercontent.com/USERNAME/goren-duyan-scraper/main/data/latest.json
+📊 Sonuçlar:
+• Toplam: 5 ilan
+• 🐱 Kedi: 3
+• 🐕 Köpek: 2
+
+🕐 Tarih: 2025-11-22 12:00
+
+🔗 Sonuçları Görüntüle
 ```
 
 ---
 
-## 🔧 Yerel Test
+## 🔧 Ayarlar
+
+### Workflow Permissions
+
+1. Settings → Actions → General
+2. "Workflow permissions" bölümünde:
+   - ✅ "Read and write permissions"
+   - ✅ "Allow GitHub Actions to create and approve pull requests"
+3. Save
+
+### Zamanı Değiştir
+
+`.github/workflows/scraper.yml`:
+```yaml
+schedule:
+  - cron: '0 9 * * *'  # Her gün 09:00 UTC
+
+# Örnekler:
+# '0 */6 * * *'  → Her 6 saatte
+# '0 12 * * *'   → Her gün 12:00 UTC
+# '0 0 * * 1'    → Her Pazartesi 00:00
+```
+
+---
+
+## 📝 Yerel Test
 
 ```bash
 # Dependencies kur
@@ -132,32 +169,20 @@ ls data/
 
 - GitHub Actions: 2000 dakika/ay ücretsiz
 - Bu proje: ~2-3 dakika/gün (~60-90 dakika/ay)
+- Telegram: Ücretsiz
 - Kredi kartı **GEREKTIRMEZ**
 
 ---
 
-## 📝 Loglar
+## 📚 Detaylı Dokümantasyon
 
-1. Repository → **Actions**
-2. Son çalışmayı tıkla
-3. "scrape" job'ı aç
-4. Tüm detayları gör
-
----
-
-## 🤝 Katkıda Bulunun
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing`)
-3. Commit edin (`git commit -m 'Add amazing feature'`)
-4. Push edin (`git push origin feature/amazing`)
-5. Pull Request açın
+- [Kurulum Rehberi](GITHUB_ACTIONS_KURULUM.md)
 
 ---
 
 ## 📄 Lisans
 
-MIT License
+MIT License - Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
 ---
 
@@ -167,5 +192,5 @@ MIT License
 
 ---
 
-**Made with ❤️ | 🐱 Kedi | 🐕 Köpek | 🤖 GitHub Actions**
+**Made with ❤️ | 🐱 Kedi | 🐕 Köpek | 🤖 GitHub Actions | 📱 Telegram**
 

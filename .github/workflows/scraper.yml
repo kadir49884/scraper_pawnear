@@ -41,4 +41,30 @@ jobs:
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Send Telegram notification
+      if: success()
+      run: |
+        # JSON dosyasından bilgileri çek
+        TOPLAM=$(jq -r '.toplam' data/latest.json)
+        KEDI=$(jq -r '.kedi | length' data/latest.json)
+        KOPEK=$(jq -r '.kopek | length' data/latest.json)
+        TARIH=$(date +'%Y-%m-%d %H:%M')
+        
+        # Mesaj hazırla
+        MESSAGE="🤖 *Gören Duyan Scraper*%0A%0A"
+        MESSAGE+="✅ Tarama tamamlandı!%0A%0A"
+        MESSAGE+="📊 *Sonuçlar:*%0A"
+        MESSAGE+="• Toplam: *${TOPLAM}* ilan%0A"
+        MESSAGE+="• 🐱 Kedi: *${KEDI}*%0A"
+        MESSAGE+="• 🐕 Köpek: *${KOPEK}*%0A%0A"
+        MESSAGE+="🕐 Tarih: ${TARIH}%0A%0A"
+        MESSAGE+="🔗 [Sonuçları Görüntüle](https://github.com/${{ github.repository }}/tree/main/data)"
+        
+        # Telegram'a gönder
+        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d text="${MESSAGE}" \
+          -d parse_mode="Markdown" \
+          -d disable_web_page_preview=true
 
