@@ -38,6 +38,9 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git add data/
         git diff --quiet && git diff --staged --quiet || git commit -m "🤖 Günlük ilan taraması - $(date +'%Y-%m-%d %H:%M')"
+        
+        # Conflict durumunda pull ve retry
+        git pull --rebase origin main || true
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
