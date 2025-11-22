@@ -51,11 +51,20 @@ jobs:
         BUGUN=$(date +'%Y-%m-%d')
         TARIHLI_DOSYA="data/ilan_taramasi_${BUGUN}.json"
         
-        TOPLAM=$(jq '. | length' $TARIHLI_DOSYA)
-        KEDI=$(jq '[.[] | select(.kategori == "Kedi")] | length' $TARIHLI_DOSYA)
-        KOPEK=$(jq '[.[] | select(.kategori == "Kedi" | not)] | length' $TARIHLI_DOSYA)
+        # Dosya var mı kontrol et
+        if [ ! -f "$TARIHLI_DOSYA" ]; then
+          echo "Hata: $TARIHLI_DOSYA bulunamadi"
+          exit 0
+        fi
         
+        # İstatistikleri hesapla
+        TOPLAM=$(jq '. | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
+        KEDI=$(jq '[.[] | select(.kategori == "Kedi")] | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
+        KOPEK=$(jq '[.[] | select(.kategori == "Kopek")] | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
+        
+        # Mesaj oluştur
         MESAJ="Gunluk Ilan Taramasi - ${BUGUN}%0A%0AToplam: ${TOPLAM} ilan%0AKedi: ${KEDI}%0AKopek: ${KOPEK}%0A%0AGitHub: https://github.com/${{ github.repository }}/blob/main/${TARIHLI_DOSYA}"
         
-        curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}&text=${MESAJ}"
+        # Telegram'a gönder
+        curl -s -X GET "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}&text=${MESAJ}" || echo "Telegram hatasi (devam ediliyor)"
 
