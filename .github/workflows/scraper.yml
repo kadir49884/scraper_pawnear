@@ -48,29 +48,14 @@ jobs:
     - name: Send Telegram notification
       if: success()
       run: |
-        # İlan istatistiklerini hesapla
         BUGUN=$(date +'%Y-%m-%d')
         TARIHLI_DOSYA="data/ilan_taramasi_${BUGUN}.json"
         
         TOPLAM=$(jq '. | length' $TARIHLI_DOSYA)
         KEDI=$(jq '[.[] | select(.kategori == "Kedi")] | length' $TARIHLI_DOSYA)
-        KOPEK=$(jq '[.[] | select(.kategori == "Köpek")] | length' $TARIHLI_DOSYA)
+        KOPEK=$(jq '[.[] | select(.kategori == "Kedi" | not)] | length' $TARIHLI_DOSYA)
         
-        # Özet mesaj oluştur
-        MESAJ="🤖 Günlük İlan Taraması - ${BUGUN}
-
-📊 ÖZET:
-• Toplam: ${TOPLAM} ilan
-• 🐱 Kedi: ${KEDI}
-• 🐶 Köpek: ${KOPEK}
-
-📁 Dosya: ${TARIHLI_DOSYA}
-🔗 GitHub: https://github.com/${{ github.repository }}/blob/main/${TARIHLI_DOSYA}
-
-✅ Tarama başarıyla tamamlandı!"
+        MESAJ="Gunluk Ilan Taramasi - ${BUGUN}%0A%0AToplam: ${TOPLAM} ilan%0AKedi: ${KEDI}%0AKopek: ${KOPEK}%0A%0AGitHub: https://github.com/${{ github.repository }}/blob/main/${TARIHLI_DOSYA}"
         
-        # Telegram'a özet mesaj gönder
-        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -H "Content-Type: application/json" \
-          -d "{\"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\", \"text\": \"$MESAJ\", \"parse_mode\": \"Markdown\"}"
+        curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}&text=${MESAJ}"
 
