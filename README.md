@@ -4,8 +4,11 @@ Günde bir kez otomatik olarak çalışan, kayıp/sahiplendirme ilanlarını tar
 
 ## 🌐 Desteklenen Siteler
 
-- ✅ **GorenDuyan.com** - Kedi & Köpek (Son 24 saat)
-- ✅ **Petcim.com** - Satılık Kedi İlanları (Son 24 saat)
+1. ✅ **GorenDuyan.com** - Kayıp/Bulundu (Kedi & Köpek)
+2. ✅ **Petcim.com** - Satılık (Kedi & Köpek)
+3. ✅ **Petlebi.com** - Sahiplendirme (Kedi & Köpek)
+
+**Toplam:** 3 site × 2 kategori = 6 veri kaynağı
 
 ## 🛠️ Özellikler
 
@@ -15,6 +18,8 @@ Günde bir kez otomatik olarak çalışan, kayıp/sahiplendirme ilanlarını tar
 - 🚫 Duplikasyon önleme
 - 📱 Telegram bildirimleri
 - ⏰ GitHub Actions ile günlük otomatik çalışma (09:00 UTC)
+- 🔄 Rate limiting ve retry mekanizması
+- 📁 Tarihli dosya sistemi (günlük arşiv)
 
 ## 📦 Kurulum
 
@@ -30,8 +35,9 @@ python github_scraper.py
 ```
 
 ### GitHub Actions (Otomatik)
-Her gün 09:00 UTC'de otomatik çalışır ve sonuçları:
-- `data/ilanlar.json` dosyasına kaydeder
+Her gün 09:00 UTC (12:00 TR)'de otomatik çalışır ve:
+- Tarihli JSON oluşturur: `data/ilan_taramasi_2025-11-22.json`
+- Son durumu günceller: `data/ilanlar.json`
 - Telegram'dan bildirim gönderir
 
 ## 📁 Çıktı Formatı
@@ -54,12 +60,11 @@ Her gün 09:00 UTC'de otomatik çalışır ve sonuçları:
 
 ## ➕ Yeni Site Ekleme
 
-1. `scrapers/` klasörüne yeni scraper ekle (örn: `yenisite_scraper.py`)
+1. `scrapers/` klasörüne yeni scraper ekle
 2. `BaseScraper` sınıfından türet
-3. `scrape()`, `parse_listings()`, `extract_details()` metodlarını implement et
+3. Gerekli metodları implement et
 4. `scraper_manager.py`'ye ekle
 
-Örnek:
 ```python
 # scrapers/yenisite_scraper.py
 from .base_scraper import BaseScraper
@@ -72,29 +77,39 @@ class YeniSiteScraper(BaseScraper):
     def scrape(self) -> List[Dict]:
         # Site-spesifik scraping mantığı
         pass
+    
+    def parse_listings(self, soup, kategori: str) -> List[Dict]:
+        # HTML parse mantığı
+        pass
+    
+    def extract_details(self, ad: Dict) -> Dict:
+        # Detay sayfası mantığı
+        pass
 ```
 
-## 📊 Yapı
+## 📊 Proje Yapısı
 
 ```
 scrapers/
 ├── __init__.py
 ├── base_scraper.py         # Abstract base class
-├── selenium_scraper.py     # CloudScraper wrapper
+├── cloud_scraper.py        # CloudScraper (bot bypass)
 ├── gorenduyan_scraper.py   # GorenDuyan implementasyonu
 ├── petcim_scraper.py       # Petcim implementasyonu
-└── scraper_manager.py      # Tüm scraper'ları yönetir
+├── petlebi_scraper.py      # Petlebi implementasyonu
+└── scraper_manager.py      # Scraper orchestrator
 
 github_scraper.py            # Ana script
+send_telegram.py             # Telegram bildirimi
 requirements.txt             # Bağımlılıklar
 ```
 
-## 🔐 Secrets (GitHub Actions)
+## 🔐 GitHub Secrets
 
 Gerekli secrets:
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
-- `GITHUB_TOKEN` (otomatik)
+- `TELEGRAM_BOT_TOKEN` - Bot token
+- `TELEGRAM_CHAT_ID` - Chat ID
+- `GITHUB_TOKEN` - Otomatik sağlanır
 
 ## 📝 Lisans
 
