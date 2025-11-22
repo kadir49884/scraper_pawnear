@@ -1,102 +1,131 @@
 # -*- coding: utf-8 -*-
 from .base_scraper import BaseScraper
+from .selenium_scraper import SeleniumScraper
 from typing import List, Dict
-import time
+from bs4 import BeautifulSoup
 import re
 
 class PetcimScraper(BaseScraper):
     def __init__(self):
         super().__init__("Petcim")
         self.base_url = "https://www.petcim.com"
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'tr-TR,tr;q=0.9',
-            'Referer': 'https://www.petcim.com/'
-        }
+        self.selenium = None
     
     def scrape(self) -> List[Dict]:
-        print(f"\n[{self.name}] Tarama basliyor...")
+        print(f"\n[{self.name}] Tarama basliyor (CloudScraper)...")
         try:
             url = f"{self.base_url}/sahibinden-satilik-kedi-ilanlar-40"
-            soup = self.fetch_page(url)
             
-            # İlan kartlarını bul (Petcim yapısına göre)
-            ilanlar = soup.find_all('div', class_=re.compile(r'col-lg-3|col-md-4|item|card'))
+            # CloudScraper ile sayfa yükle
+            self.selenium = SeleniumScraper()
+            page_source = self.selenium.get_page_source(url, wait_time=2)
+            soup = BeautifulSoup(page_source, 'html.parser')
             
-            if not ilanlar:
-                ilanlar = soup.find_all('a', href=re.compile(r'/ilan-detay/'))
-            
-            result = []
-            for card in ilanlar[:20]:  # İlk 20 ilan
-                try:
-                    ilan = self._parse_card(card)
-                    if ilan and self._is_within_24_hours(ilan.get('tarih1', '')):
-                        result.append(ilan)
-                        time.sleep(0.3)
-                except:
-                    continue
+            listings = self.parse_listings(soup)
+            result = self.get_last_24_hours_ads(listings)
             
             print(f"[{self.name}] {len(result)} ilan bulundu")
             return result
         except Exception as e:
             print(f"[{self.name}] Hata: {e}")
+            import traceback
+            traceback.print_exc()
             return []
+        finally:
+            if self.selenium:
+                self.selenium.close()
     
-    def _parse_card(self, card) -> Dict:
+    def parse_listings(self, soup) -> List[Dict]:
+        """İlanları parse et"""
+        listings = []
+        
+        # Tablo içindeki tr'ları bul (onclick ile)
+        items = soup.select('tr[onclick]')
+        print(f"[{self.name}] {len(items)} ilan bulundu sayfada")
+        
+        for item in items:
+            try:
+                # Link
+                onclick = item.get('onclick', '')
+                if 'location.href=' not in onclick:
+                    continue
+                link_path = onclick.split("'")[1]
+                link = f"{self.base_url}/{link_path}"
+                
+                # Başlık
+                title_tag = item.select_one('td.baslik a')
+                title = title_tag.get_text(strip=True) if title_tag else ''
+                
+                # Tarih (DD.MM.YYYY formatında)
+                date_tag = item.select_one('td.tarih')
+                date = date_tag.get_text(strip=True) if date_tag else ''
+                
+                # Konum
+                location_tag = item.select_one('td.konum')
+                location = location_tag.get_text(strip=True).replace('\n', ' / ') if location_tag else ''
+                
+                # Görsel
+                img_tag = item.select_one('td.resim img')
+                image = ''
+                if img_tag:
+                    image = img_tag.get('data-src', img_tag.get('src', ''))
+                    if image and not image.startswith('http'):
+                        image = f"{self.base_url}/{image}"
+                
+                # İlan türü
+                fiyat_tag = item.select_one('td.fiyat')
+                fiyat_text = fiyat_tag.get_text(strip=True) if fiyat_tag else ''
+                ilan_turu = 'Sahiplendirme' if 'Sahiplendirme' in fiyat_text else 'Satılık'
+                
+                listing = {
+                    'title': title,
+                    'link': link,
+                    'date': date,
+                    'location': location,
+                    'image': image,
+                    'type': ilan_turu
+                }
+                listings.append(listing)
+            except Exception as e:
+                print(f"[{self.name}] Parse hatasi: {e}")
+                continue
+        
+        return listings
+    
+    def extract_details(self, ad: Dict) -> Dict:
+        """Detay sayfasından açıklama al"""
         try:
-            # Başlık
-            baslik_tag = card.find(['h3', 'h4', 'h5', 'a'], class_=re.compile(r'title|name|baslik'))
-            if not baslik_tag:
-                baslik_tag = card.find('a')
-            baslik = baslik_tag.get_text(strip=True) if baslik_tag else ''
+            soup = self.fetch_page(ad['link'])
             
-            if not baslik or len(baslik) < 5:
-                return None
+            # Açıklama (farklı selector'lar dene)
+            desc_tag = soup.find('div', class_=re.compile(r'description|aciklama|content'))
+            if not desc_tag:
+                desc_tag = soup.find('p', class_=re.compile(r'text|content'))
             
-            # Link
-            link_tag = card if card.name == 'a' else card.find('a')
-            link = link_tag.get('href', '') if link_tag else ''
-            if link and not link.startswith('http'):
-                link = f"{self.base_url}{link}"
-            
-            # Görsel
-            img_tag = card.find('img')
-            gorsel = ''
-            if img_tag:
-                gorsel = img_tag.get('src', '') or img_tag.get('data-src', '') or img_tag.get('data-lazy', '')
-                if gorsel and not gorsel.startswith('http'):
-                    gorsel = f"{self.base_url}{gorsel}"
-            
-            # Konum - span veya div içinde olabilir
-            konum = ''
-            konum_tag = card.find(string=re.compile(r'İl|İlçe', re.I))
-            if konum_tag:
-                konum = konum_tag.strip()
-            
-            # Tarih - "bugün", "dün" veya "X gün önce" formatında
-            tarih_tag = card.find(string=re.compile(r'bugün|dün|gün önce|saat önce', re.I))
-            tarih1 = tarih_tag.strip() if tarih_tag else 'Bugün'
+            aciklama = desc_tag.get_text(strip=True) if desc_tag else ad['title']
             
             return {
-                'ilan_turu': 'Sahiplendirme',
-                'baslik': baslik,
-                'aciklama': baslik,  # Detay sayfası 403 verirse başlık kullan
-                'konum': konum or 'Türkiye',
-                'tarih1': tarih1,
-                'tarih2': self.goreli_tarih_hesapla(tarih1),
+                'ilan_turu': ad['type'],
+                'baslik': ad['title'],
+                'aciklama': aciklama,
+                'konum': ad['location'],
+                'tarih1': ad['date'],
+                'tarih2': self.parse_date_string(ad['date']),
                 'kategori': 'Kedi',
-                'gorsel': gorsel,
-                'link': link
+                'gorsel': ad['image'],
+                'link': ad['link']
             }
-        except:
-            return None
-    
-    def _is_within_24_hours(self, tarih_text: str) -> bool:
-        tarih_lower = tarih_text.lower()
-        if any(x in tarih_lower for x in ['bugün', 'bugun', 'saat önce', 'saat once', 'dakika']):
-            return True
-        if 'dün' in tarih_lower or 'dun' in tarih_lower:
-            return True
-        return False
-
+        except Exception as e:
+            print(f"[{self.name}] Detay alma hatasi: {e}")
+            # Hata olursa başlığı açıklama olarak kullan
+            return {
+                'ilan_turu': ad['type'],
+                'baslik': ad['title'],
+                'aciklama': ad['title'],
+                'konum': ad['location'],
+                'tarih1': ad['date'],
+                'tarih2': self.parse_date_string(ad['date']),
+                'kategori': 'Kedi',
+                'gorsel': ad['image'],
+                'link': ad['link']
+            }

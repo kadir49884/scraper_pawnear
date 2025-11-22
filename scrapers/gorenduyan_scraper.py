@@ -110,4 +110,12 @@ class GorenDuyanScraper(BaseScraper):
             return ""
         except:
             return ""
+    
+    def parse_listings(self, soup) -> List[Dict]:
+        """BaseScraper abstract metodu - Kullanılmıyor"""
+        return []
+    
+    def extract_details(self, ad: Dict) -> Dict:
+        """BaseScraper abstract metodu - Kullanılmıyor"""
+        return ad
 

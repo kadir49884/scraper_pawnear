@@ -46,4 +46,57 @@ class BaseScraper(ABC):
             return simdi.strftime('%Y-%m-%dT%H:%M:%SZ')
         except:
             return datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    def parse_date_string(self, date_str: str) -> str:
+        """
+        Tarih string'ini ISO 8601 formatına çevir
+        DD.MM.YYYY -> 2025-11-22T00:00:00Z
+        """
+        try:
+            # DD.MM.YYYY formatı (Petcim)
+            if re.match(r'\d{2}\.\d{2}\.\d{4}', date_str):
+                date_obj = datetime.strptime(date_str, '%d.%m.%Y')
+                return date_obj.strftime('%Y-%m-%dT00:00:00Z')
+            
+            # Göreceli tarih (X Saat Önce)
+            return self.goreli_tarih_hesapla(date_str)
+        except:
+            return datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    def get_last_24_hours_ads(self, listings: List[Dict]) -> List[Dict]:
+        """
+        Son 24 saat içindeki ilanları filtrele ve detayları al
+        """
+        result = []
+        now = datetime.now()
+        
+        for ad in listings:
+            try:
+                # Tarih kontrolü (DD.MM.YYYY formatı)
+                date_str = ad.get('date', '')
+                if re.match(r'\d{2}\.\d{2}\.\d{4}', date_str):
+                    date_obj = datetime.strptime(date_str, '%d.%m.%Y')
+                    diff = now - date_obj
+                    if diff.days > 1:  # 1 günden eski
+                        continue
+                
+                # Detayları al
+                detailed_ad = self.extract_details(ad)
+                if detailed_ad:
+                    result.append(detailed_ad)
+            except Exception as e:
+                print(f"[{self.name}] Detay alma hatasi: {e}")
+                continue
+        
+        return result
+    
+    @abstractmethod
+    def parse_listings(self, soup) -> List[Dict]:
+        """İlanları parse et"""
+        pass
+    
+    @abstractmethod
+    def extract_details(self, ad: Dict) -> Dict:
+        """Detay sayfasından bilgileri al"""
+        pass
 
