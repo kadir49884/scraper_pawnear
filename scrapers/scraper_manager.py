@@ -2,12 +2,14 @@
 from typing import List, Dict
 from .gorenduyan_scraper import GorenDuyanScraper
 from .petcim_scraper import PetcimScraper
+from .petlebi_scraper import PetlebiScraper
 
 class ScraperManager:
     def __init__(self):
         self.scrapers = [
             GorenDuyanScraper(),
-            PetcimScraper()
+            PetcimScraper(),
+            PetlebiScraper()
         ]
     
     def scrape_all(self) -> List[Dict]:
