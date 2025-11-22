@@ -13,19 +13,20 @@ class PetcimScraper(BaseScraper):
     
     def scrape(self) -> List[Dict]:
         print(f"\n[{self.name}] Tarama basliyor (CloudScraper)...")
+        all_results = []
+        
+        # CloudScraper'ı başlat (her iki kategori için aynı session)
+        self.selenium = SeleniumScraper()
+        
         try:
-            url = f"{self.base_url}/sahibinden-satilik-kedi-ilanlar-40"
+            # 1. Kedi ilanları
+            all_results.extend(self._scrape_category('kedi', 40, 'Kedi'))
             
-            # CloudScraper ile sayfa yükle
-            self.selenium = SeleniumScraper()
-            page_source = self.selenium.get_page_source(url, wait_time=2)
-            soup = BeautifulSoup(page_source, 'html.parser')
+            # 2. Köpek ilanları
+            all_results.extend(self._scrape_category('kopek', 41, 'Köpek'))
             
-            listings = self.parse_listings(soup)
-            result = self.get_last_24_hours_ads(listings)
-            
-            print(f"[{self.name}] {len(result)} ilan bulundu")
-            return result
+            print(f"[{self.name}] Toplam {len(all_results)} ilan bulundu")
+            return all_results
         except Exception as e:
             print(f"[{self.name}] Hata: {e}")
             import traceback
@@ -35,13 +36,31 @@ class PetcimScraper(BaseScraper):
             if self.selenium:
                 self.selenium.close()
     
-    def parse_listings(self, soup) -> List[Dict]:
+    def _scrape_category(self, category: str, category_id: int, kategori_adi: str) -> List[Dict]:
+        """Belirli bir kategoriyi tara"""
+        try:
+            url = f"{self.base_url}/sahibinden-satilik-{category}-ilanlar-{category_id}"
+            print(f"[{self.name}] {kategori_adi} kategorisi taranıyor...")
+            
+            # Sayfa yükle
+            page_source = self.selenium.get_page_source(url, wait_time=2)
+            soup = BeautifulSoup(page_source, 'html.parser')
+            
+            listings = self.parse_listings(soup, kategori_adi)
+            result = self.get_last_24_hours_ads(listings)
+            
+            print(f"[{self.name}] {kategori_adi}: {len(result)} ilan")
+            return result
+        except Exception as e:
+            print(f"[{self.name}] {kategori_adi} hatası: {e}")
+            return []
+    
+    def parse_listings(self, soup, kategori: str) -> List[Dict]:
         """İlanları parse et"""
         listings = []
         
         # Tablo içindeki tr'ları bul (onclick ile)
         items = soup.select('tr[onclick]')
-        print(f"[{self.name}] {len(items)} ilan bulundu sayfada")
         
         for item in items:
             try:
@@ -87,7 +106,8 @@ class PetcimScraper(BaseScraper):
                     'date': date,
                     'location': location,
                     'image': image,
-                    'type': ilan_turu
+                    'type': ilan_turu,
+                    'category': kategori  # Kategoriyi ekle
                 }
                 listings.append(listing)
             except Exception as e:
@@ -123,7 +143,7 @@ class PetcimScraper(BaseScraper):
             'konum': ad['location'],
             'tarih1': ad['date'],
             'tarih2': self.parse_date_string(ad['date']),
-            'kategori': 'Kedi',
+            'kategori': ad.get('category', 'Kedi'),  # Kategoriden al
             'gorsel': ad['image'],
             'link': ad['link']
         }
