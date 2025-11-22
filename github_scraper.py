@@ -36,11 +36,21 @@ def main():
     # data/ klasörü oluştur
     os.makedirs('data', exist_ok=True)
     
-    # Tek dosyaya kaydet - sadece ilan listesi
+    # Tarihli dosya adı: ilan_taramasi_2025-11-22.json
+    bugun = datetime.now().strftime('%Y-%m-%d')
+    tarihli_dosya = f'data/ilan_taramasi_{bugun}.json'
+    
+    # Tarihli dosyaya kaydet (her gün yeni dosya)
+    with open(tarihli_dosya, 'w', encoding='utf-8') as f:
+        json.dump(tum_ilanlar, f, ensure_ascii=False, indent=2)
+    
+    # ilanlar.json'u da güncelle (son durum için)
     with open('data/ilanlar.json', 'w', encoding='utf-8') as f:
         json.dump(tum_ilanlar, f, ensure_ascii=False, indent=2)
     
-    print(f"\n[OK] Sonuclar 'data/ilanlar.json' dosyasina kaydedildi!")
+    print(f"\n[OK] Sonuclar kaydedildi!")
+    print(f"   - Tarihli dosya: {tarihli_dosya}")
+    print(f"   - Son durum: data/ilanlar.json")
     print(f"   - Toplam {len(tum_ilanlar)} ilan")
     print(f"   - {kedi_sayisi} kedi + {kopek_sayisi} kopek")
     

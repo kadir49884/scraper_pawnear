@@ -36,7 +36,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add data/ilanlar.json
+        git add data/
         git diff --quiet && git diff --staged --quiet || git commit -m "🤖 Günlük ilan taraması - $(date +'%Y-%m-%d %H:%M')"
         git push
       env:
@@ -45,11 +45,12 @@ jobs:
     - name: Send Telegram notification
       if: success()
       run: |
-        # JSON içeriğini oku ve text olarak gönder
-        JSON_CONTENT=$(cat data/ilanlar.json)
+        # Bugünün tarihli dosyasını bul
+        BUGUN=$(date +'%Y-%m-%d')
+        TARIHLI_DOSYA="data/ilan_taramasi_${BUGUN}.json"
         
         # Telegram'a text mesajı olarak gönder
         curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
           -H "Content-Type: application/json" \
-          -d "{\"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\", \"text\": $(jq -Rs . data/ilanlar.json)}"
+          -d "{\"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\", \"text\": $(jq -Rs . $TARIHLI_DOSYA)}"
 
