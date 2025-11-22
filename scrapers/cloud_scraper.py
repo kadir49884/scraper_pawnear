@@ -5,9 +5,9 @@ CloudScraper - Cloudflare/bot koruması bypass
 import cloudscraper
 import time
 
-class SeleniumScraper:
+class CloudScraper:
     """
-    cloudscraper ile bot koruması bypass
+    Cloudflare ve bot koruması olan siteleri aşmak için
     """
     
     def __init__(self):

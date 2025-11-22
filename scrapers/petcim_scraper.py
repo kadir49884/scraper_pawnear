@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
 from .base_scraper import BaseScraper
-from .selenium_scraper import SeleniumScraper
+from .cloud_scraper import CloudScraper
 from typing import List, Dict
 from bs4 import BeautifulSoup
+import time
 import re
 
 class PetcimScraper(BaseScraper):
     def __init__(self):
         super().__init__("Petcim")
         self.base_url = "https://www.petcim.com"
-        self.selenium = None
+        self.cloud_scraper = None
+        self.request_delay = 0.5  # Rate limiting: 0.5 saniye bekle
     
     def scrape(self) -> List[Dict]:
         print(f"\n[{self.name}] Tarama basliyor (CloudScraper)...")
         all_results = []
         
         # CloudScraper'ı başlat (her iki kategori için aynı session)
-        self.selenium = SeleniumScraper()
+        self.cloud_scraper = CloudScraper()
         
         try:
             # 1. Kedi ilanları
@@ -29,12 +31,10 @@ class PetcimScraper(BaseScraper):
             return all_results
         except Exception as e:
             print(f"[{self.name}] Hata: {e}")
-            import traceback
-            traceback.print_exc()
             return []
         finally:
-            if self.selenium:
-                self.selenium.close()
+            if self.cloud_scraper:
+                self.cloud_scraper.close()
     
     def _scrape_category(self, category: str, category_id: int, kategori_adi: str) -> List[Dict]:
         """Belirli bir kategoriyi tara"""
@@ -43,7 +43,7 @@ class PetcimScraper(BaseScraper):
             print(f"[{self.name}] {kategori_adi} kategorisi taranıyor...")
             
             # Sayfa yükle
-            page_source = self.selenium.get_page_source(url, wait_time=2)
+            page_source = self.cloud_scraper.get_page_source(url, wait_time=2)
             soup = BeautifulSoup(page_source, 'html.parser')
             
             listings = self.parse_listings(soup, kategori_adi)
@@ -120,21 +120,31 @@ class PetcimScraper(BaseScraper):
         """Detay sayfasından açıklama al (CloudScraper ile)"""
         aciklama = ad['title']  # Varsayılan
         
-        try:
-            # CloudScraper ile detay sayfasını yükle
-            if not self.selenium:
-                self.selenium = SeleniumScraper()
-            
-            page_source = self.selenium.get_page_source(ad['link'], wait_time=1)
-            soup = BeautifulSoup(page_source, 'html.parser')
-            
-            # Açıklama - Petcim'de "div.aciklama" içinde
-            desc_tag = soup.find('div', class_='aciklama')
-            if desc_tag:
-                aciklama = desc_tag.get_text(strip=True)
-            
-        except Exception as e:
-            print(f"[{self.name}] Detay alma hatasi ({ad['link']}): {e}")
+        # Rate limiting - Her request arasında bekle
+        time.sleep(self.request_delay)
+        
+        # Retry mekanizması
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                if not self.cloud_scraper:
+                    self.cloud_scraper = CloudScraper()
+                
+                page_source = self.cloud_scraper.get_page_source(ad['link'], wait_time=1)
+                soup = BeautifulSoup(page_source, 'html.parser')
+                
+                # Açıklama - Petcim'de "div.aciklama" içinde
+                desc_tag = soup.find('div', class_='aciklama')
+                if desc_tag:
+                    aciklama = desc_tag.get_text(strip=True)
+                break  # Başarılı, döngüden çık
+                
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"[{self.name}] Retry {attempt + 1}/{max_retries}")
+                    time.sleep(2)  # Hata durumunda daha uzun bekle
+                else:
+                    print(f"[{self.name}] Detay alma hatasi: {e}")
         
         return {
             'ilan_turu': ad['type'],
@@ -143,7 +153,7 @@ class PetcimScraper(BaseScraper):
             'konum': ad['location'],
             'tarih1': ad['date'],
             'tarih2': self.parse_date_string(ad['date']),
-            'kategori': ad.get('category', 'Kedi'),  # Kategoriden al
+            'kategori': ad.get('category', 'Kedi'),
             'gorsel': ad['image'],
             'link': ad['link']
         }
