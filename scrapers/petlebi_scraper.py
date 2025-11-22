@@ -12,26 +12,44 @@ class PetlebiScraper(BaseScraper):
     
     def scrape(self) -> List[Dict]:
         print(f"\n[{self.name}] Tarama basliyor...")
+        all_results = []
+        
         try:
-            # Kedi sahiplendirme sayfası
-            url = f"{self.base_url}/kedi-sahiplenme"
-            soup = self.fetch_page(url)
+            # 1. Kedi sahiplendirme
+            all_results.extend(self._scrape_category('kedi-sahiplenme', 'Kedi'))
             
-            listings = self.parse_listings(soup, 'Kedi')
-            result = self.get_last_24_hours_ads(listings)
+            # 2. Köpek sahiplendirme
+            all_results.extend(self._scrape_category('kopek-sahiplenme', 'Köpek'))
             
-            print(f"[{self.name}] {len(result)} ilan bulundu")
-            return result
+            print(f"[{self.name}] Toplam {len(all_results)} ilan bulundu")
+            return all_results
         except Exception as e:
             print(f"[{self.name}] Hata: {e}")
+            return []
+    
+    def _scrape_category(self, category: str, kategori_adi: str) -> List[Dict]:
+        """Belirli bir kategoriyi tara"""
+        try:
+            url = f"{self.base_url}/{category}"
+            print(f"[{self.name}] {kategori_adi} kategorisi taranıyor...")
+            
+            soup = self.fetch_page(url)
+            listings = self.parse_listings(soup, kategori_adi)
+            result = self.get_last_24_hours_ads(listings)
+            
+            print(f"[{self.name}] {kategori_adi}: {len(result)} ilan")
+            return result
+        except Exception as e:
+            print(f"[{self.name}] {kategori_adi} hatası: {e}")
             return []
     
     def parse_listings(self, soup, kategori: str) -> List[Dict]:
         """İlanları parse et"""
         listings = []
         
-        # İlan linklerini bul
-        links = soup.find_all('a', href=re.compile(r'/kedi-sahiplenme/\d+'))
+        # İlan linklerini bul (kedi veya köpek)
+        pattern = r'/(kedi|kopek)-sahiplenme/\d+'
+        links = soup.find_all('a', href=re.compile(pattern))
         
         for link in links:
             try:
