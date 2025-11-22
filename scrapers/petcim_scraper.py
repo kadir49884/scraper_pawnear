@@ -62,7 +62,11 @@ class PetcimScraper(BaseScraper):
                 
                 # Konum
                 location_tag = item.select_one('td.konum')
-                location = location_tag.get_text(strip=True).replace('\n', ' / ') if location_tag else ''
+                if location_tag:
+                    konum_parts = [s.strip() for s in location_tag.stripped_strings]
+                    location = ' / '.join(konum_parts)
+                else:
+                    location = ''
                 
                 # Görsel
                 img_tag = item.select_one('td.resim img')
@@ -93,39 +97,33 @@ class PetcimScraper(BaseScraper):
         return listings
     
     def extract_details(self, ad: Dict) -> Dict:
-        """Detay sayfasından açıklama al"""
+        """Detay sayfasından açıklama al (CloudScraper ile)"""
+        aciklama = ad['title']  # Varsayılan
+        
         try:
-            soup = self.fetch_page(ad['link'])
+            # CloudScraper ile detay sayfasını yükle
+            if not self.selenium:
+                self.selenium = SeleniumScraper()
             
-            # Açıklama (farklı selector'lar dene)
-            desc_tag = soup.find('div', class_=re.compile(r'description|aciklama|content'))
-            if not desc_tag:
-                desc_tag = soup.find('p', class_=re.compile(r'text|content'))
+            page_source = self.selenium.get_page_source(ad['link'], wait_time=1)
+            soup = BeautifulSoup(page_source, 'html.parser')
             
-            aciklama = desc_tag.get_text(strip=True) if desc_tag else ad['title']
+            # Açıklama - Petcim'de "div.aciklama" içinde
+            desc_tag = soup.find('div', class_='aciklama')
+            if desc_tag:
+                aciklama = desc_tag.get_text(strip=True)
             
-            return {
-                'ilan_turu': ad['type'],
-                'baslik': ad['title'],
-                'aciklama': aciklama,
-                'konum': ad['location'],
-                'tarih1': ad['date'],
-                'tarih2': self.parse_date_string(ad['date']),
-                'kategori': 'Kedi',
-                'gorsel': ad['image'],
-                'link': ad['link']
-            }
         except Exception as e:
-            print(f"[{self.name}] Detay alma hatasi: {e}")
-            # Hata olursa başlığı açıklama olarak kullan
-            return {
-                'ilan_turu': ad['type'],
-                'baslik': ad['title'],
-                'aciklama': ad['title'],
-                'konum': ad['location'],
-                'tarih1': ad['date'],
-                'tarih2': self.parse_date_string(ad['date']),
-                'kategori': 'Kedi',
-                'gorsel': ad['image'],
-                'link': ad['link']
-            }
+            print(f"[{self.name}] Detay alma hatasi ({ad['link']}): {e}")
+        
+        return {
+            'ilan_turu': ad['type'],
+            'baslik': ad['title'],
+            'aciklama': aciklama,
+            'konum': ad['location'],
+            'tarih1': ad['date'],
+            'tarih2': self.parse_date_string(ad['date']),
+            'kategori': 'Kedi',
+            'gorsel': ad['image'],
+            'link': ad['link']
+        }
