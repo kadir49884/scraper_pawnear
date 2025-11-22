@@ -47,24 +47,9 @@ jobs:
     
     - name: Send Telegram notification
       if: success()
-      run: |
-        BUGUN=$(date +'%Y-%m-%d')
-        TARIHLI_DOSYA="data/ilan_taramasi_${BUGUN}.json"
-        
-        # Dosya var mı kontrol et
-        if [ ! -f "$TARIHLI_DOSYA" ]; then
-          echo "Hata: $TARIHLI_DOSYA bulunamadi"
-          exit 0
-        fi
-        
-        # İstatistikleri hesapla
-        TOPLAM=$(jq '. | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
-        KEDI=$(jq '[.[] | select(.kategori == "Kedi")] | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
-        KOPEK=$(jq '[.[] | select(.kategori == "Kopek")] | length' "$TARIHLI_DOSYA" 2>/dev/null || echo "0")
-        
-        # Mesaj oluştur
-        MESAJ="Gunluk Ilan Taramasi - ${BUGUN}%0A%0AToplam: ${TOPLAM} ilan%0AKedi: ${KEDI}%0AKopek: ${KOPEK}%0A%0AGitHub: https://github.com/${{ github.repository }}/blob/main/${TARIHLI_DOSYA}"
-        
-        # Telegram'a gönder
-        curl -s -X GET "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}&text=${MESAJ}" || echo "Telegram hatasi (devam ediliyor)"
+      run: python send_telegram.py
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
 
