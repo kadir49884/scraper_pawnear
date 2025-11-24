@@ -15,6 +15,9 @@ kedi_ilanlari_*.json
 kopek_ilanlari_*.json
 sonuclar_*.json
 
+# Paylaşılan ilanlar (günlük, commit edilmemeli)
+data/shared_*.json
+
 # data/ klasörü GitHub Actions tarafından yönetiliyor
 # .gitignore'dan hariç tutuldu (commit edilecek)
 

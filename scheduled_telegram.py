@@ -37,6 +37,33 @@ class SocialPublisher:
         with open(dosya, 'r', encoding='utf-8') as f:
             return json.load(f)
     
+    def _load_shared_ilanlar(self):
+        """Bugün paylaşılan ilanları yükle"""
+        bugun = datetime.now().strftime('%Y-%m-%d')
+        dosya = f'data/shared_{bugun}.json'
+        
+        if not os.path.exists(dosya):
+            return []
+        
+        try:
+            with open(dosya, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return []
+    
+    def _save_shared_ilan(self, ilan_index):
+        """Paylaşılan ilanı kaydet"""
+        bugun = datetime.now().strftime('%Y-%m-%d')
+        dosya = f'data/shared_{bugun}.json'
+        
+        shared = self._load_shared_ilanlar()
+        if ilan_index not in shared:
+            shared.append(ilan_index)
+        
+        os.makedirs('data', exist_ok=True)
+        with open(dosya, 'w', encoding='utf-8') as f:
+            json.dump(shared, f)
+    
     def _send_message(self, text):
         """Telegram'a mesaj gönder"""
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
@@ -98,20 +125,22 @@ class SocialPublisher:
             return f"❌ PAYLAŞIM BAŞARISIZ\n\n📝 {baslik}\n\n🚫 Hata: {error}"
     
     def _find_valid_ilan(self, ilanlar, preferred_index):
-        """İlan bulamazsa geri geri giderek uygun ilan bul"""
+        """İlan bulamazsa geri geri giderek uygun ilan bul (daha önce paylaşılmamış)"""
         total = len(ilanlar)
+        shared = self._load_shared_ilanlar()
         
-        # İstenen indeks varsa direkt döndür
-        if preferred_index < total:
+        # İstenen indeks varsa ve paylaşılmamışsa direkt döndür
+        if preferred_index < total and preferred_index not in shared:
             return preferred_index
         
-        # Yoksa geriye doğru ara
+        # Yoksa geriye doğru ara (paylaşılmamış ilan bul)
         for i in range(preferred_index - 1, -1, -1):
-            if i < total:
-                print(f"[FALLBACK] İlan {preferred_index + 1} yok, İlan {i + 1} kullanılıyor")
+            if i < total and i not in shared:
+                print(f"[FALLBACK] İlan {preferred_index + 1} paylaşılmış/yok, İlan {i + 1} kullanılıyor")
                 return i
         
-        # Hiç ilan yoksa
+        # Hiç paylaşılmamış ilan yoksa
+        print(f"[UYARI] Tüm ilanlar zaten paylaşılmış")
         return None
     
     def publish_scheduled_ilanlar(self, start_index, count=1):
@@ -140,7 +169,9 @@ class SocialPublisher:
             message = self._format_result_message(ilan, result)
             if self._send_message(message):
                 if result.get('success'):
-                    print(f"[OK] İlan {valid_index + 1} paylaşıldı ve bildirim gönderildi")
+                    # Başarılıysa paylaşılan listeye ekle
+                    self._save_shared_ilan(valid_index)
+                    print(f"[OK] İlan {valid_index + 1} paylaşıldı ve kaydedildi")
                     return True
                 else:
                     print(f"[UYARI] İlan {valid_index + 1} paylaşılamadı ama bildirim gönderildi")
