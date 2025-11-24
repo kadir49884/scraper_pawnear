@@ -2,6 +2,8 @@ name: Zamanlanmış Telegram Mesajları
 
 on:
   schedule:
+    # TEST - 17:25 TR (14:25 UTC) - İlan 1-2
+    - cron: '25 14 * * *'
     # 17:00 TR (14:00 UTC) - 1. ve 2. ilan
     - cron: '0 14 * * *'
     # 18:00 TR (15:00 UTC) - 3. ve 4. ilan
@@ -23,6 +25,22 @@ on:
         default: '2'
 
 jobs:
+  send-test:
+    if: github.event.schedule == '25 14 * * *'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: TEST 17:25 - İlan 1-2
+      run: python scheduled_telegram.py
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        ILAN_START_INDEX: '0'
+        ILAN_COUNT: '2'
+
   send-17:
     if: github.event.schedule == '0 14 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
