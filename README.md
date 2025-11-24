@@ -6,18 +6,19 @@ Otomatik hayvan ilanları scraper ve Telegram bildirimi sistemi.
 
 - **Multi-Site Scraping**: GorenDuyan, Petcim, Petlebi sitelerinden otomatik ilan çekme
 - **Günlük Tarama**: Her gün saat 12:00'da otomatik tarama
-- **Zamanlanmış Bildirimler**: Günde 4 kez belirli saatlerde ilan paylaşımı
+- **Sosyal Medya Paylaşımı**: Günde 4 kez otomatik paylaşım (Facebook, Twitter, Instagram)
+- **Telegram Bildirimi**: Paylaşım sonuçları Telegram'dan bildirilir
 - **GitHub Actions**: Tamamen otomatik, sunucusuz çalışma
 - **Clean Code**: Modüler ve genişletilebilir yapı
 
-## Mesaj Zamanlaması
+## Paylaşım Zamanlaması
 
-| Saat  | İlan |
-|-------|------|
-| 17:00 | 1.   |
-| 18:00 | 2.   |
-| 19:00 | 3.   |
-| 20:00 | 4.   |
+| Saat  | İlan | Platform |
+|-------|------|----------|
+| 17:00 | 1.   | Facebook, Twitter, Instagram |
+| 18:00 | 2.   | Facebook, Twitter, Instagram |
+| 19:00 | 3.   | Facebook, Twitter, Instagram |
+| 20:00 | 4.   | Facebook, Twitter, Instagram |
 
 ## Kurulum
 
