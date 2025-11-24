@@ -12,12 +12,12 @@ Otomatik hayvan ilanları scraper ve Telegram bildirimi sistemi.
 
 ## Mesaj Zamanlaması
 
-| Saat  | İlanlar    |
-|-------|------------|
-| 17:00 | 1. ve 2.   |
-| 18:00 | 3. ve 4.   |
-| 19:00 | 5. ve 6.   |
-| 20:00 | 7. ve 8.   |
+| Saat  | İlan |
+|-------|------|
+| 17:00 | 1.   |
+| 18:00 | 2.   |
+| 19:00 | 3.   |
+| 20:00 | 4.   |
 
 ## Kurulum
 

@@ -31,13 +31,13 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 17:00 - İlan 1-2
+    - name: 17:00 - İlan 1
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         ILAN_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
-        ILAN_COUNT: ${{ github.event.inputs.count || '2' }}
+        ILAN_COUNT: ${{ github.event.inputs.count || '1' }}
 
   send-18:
     if: github.event.schedule == '0 15 * * *'
@@ -47,13 +47,13 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 18:00 - İlan 3-4
+    - name: 18:00 - İlan 2
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '2'
-        ILAN_COUNT: '2'
+        ILAN_START_INDEX: '1'
+        ILAN_COUNT: '1'
 
   send-19:
     if: github.event.schedule == '0 16 * * *'
@@ -63,13 +63,13 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 19:00 - İlan 5-6
+    - name: 19:00 - İlan 3
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '4'
-        ILAN_COUNT: '2'
+        ILAN_START_INDEX: '2'
+        ILAN_COUNT: '1'
 
   send-20:
     if: github.event.schedule == '0 17 * * *'
@@ -79,11 +79,11 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 20:00 - İlan 7-8
+    - name: 20:00 - İlan 4
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '6'
-        ILAN_COUNT: '2'
+        ILAN_START_INDEX: '3'
+        ILAN_COUNT: '1'
 
