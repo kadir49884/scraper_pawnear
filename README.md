@@ -16,9 +16,9 @@ Otomatik hayvan ilanları scraper ve Telegram bildirimi sistemi.
 | Saat  | İlan | Platform |
 |-------|------|----------|
 | 17:00 | 1.   | Facebook, Twitter, Instagram |
-| 18:00 | 2.   | Facebook, Twitter, Instagram |
-| 19:00 | 3.   | Facebook, Twitter, Instagram |
-| 20:00 | 4.   | Facebook, Twitter, Instagram |
+| 18:00 | 11.  | Facebook, Twitter, Instagram |
+| 19:00 | 21.  | Facebook, Twitter, Instagram |
+| 20:00 | 31.  | Facebook, Twitter, Instagram |
 
 ## Kurulum
 

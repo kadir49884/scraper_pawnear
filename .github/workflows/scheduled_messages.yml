@@ -47,12 +47,12 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 18:00 - İlan 2
+    - name: 18:00 - İlan 11
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '1'
+        ILAN_START_INDEX: '10'
         ILAN_COUNT: '1'
 
   send-19:
@@ -63,12 +63,12 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 19:00 - İlan 3
+    - name: 19:00 - İlan 21
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '2'
+        ILAN_START_INDEX: '20'
         ILAN_COUNT: '1'
 
   send-20:
@@ -79,11 +79,11 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 20:00 - İlan 4
+    - name: 20:00 - İlan 31
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        ILAN_START_INDEX: '3'
+        ILAN_START_INDEX: '30'
         ILAN_COUNT: '1'
 

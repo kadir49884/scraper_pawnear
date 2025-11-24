@@ -97,39 +97,60 @@ class SocialPublisher:
             error = result.get('error', 'Bilinmeyen hata')
             return f"❌ PAYLAŞIM BAŞARISIZ\n\n📝 {baslik}\n\n🚫 Hata: {error}"
     
+    def _find_valid_ilan(self, ilanlar, preferred_index):
+        """İlan bulamazsa geri geri giderek uygun ilan bul"""
+        total = len(ilanlar)
+        
+        # İstenen indeks varsa direkt döndür
+        if preferred_index < total:
+            return preferred_index
+        
+        # Yoksa geriye doğru ara
+        for i in range(preferred_index - 1, -1, -1):
+            if i < total:
+                print(f"[FALLBACK] İlan {preferred_index + 1} yok, İlan {i + 1} kullanılıyor")
+                return i
+        
+        # Hiç ilan yoksa
+        return None
+    
     def publish_scheduled_ilanlar(self, start_index, count=1):
         """Belirli indeksten başlayarak ilanları sosyal medyada paylaş"""
         ilanlar = self._load_ilanlar()
         
-        if start_index >= len(ilanlar):
-            print(f"[UYARI] Yetersiz ilan sayısı. İstenen: {start_index + 1}, Mevcut: {len(ilanlar)}")
+        if not ilanlar:
+            print(f"[HATA] Hiç ilan bulunamadı")
             return False
         
-        success_count = 0
-        end_index = min(start_index + count, len(ilanlar))
+        # Uygun ilan indeksini bul
+        valid_index = self._find_valid_ilan(ilanlar, start_index)
         
-        for i in range(start_index, end_index):
-            ilan = ilanlar[i]
+        if valid_index is None:
+            print(f"[HATA] Paylaşılacak ilan bulunamadı")
+            return False
+        
+        ilan = ilanlar[valid_index]
+        
+        try:
+            # Sosyal medyada paylaş
+            print(f"[PAYLAŞIM] İlan {valid_index + 1} paylaşılıyor...")
+            result = self._publish_to_social(ilan)
             
-            try:
-                # Sosyal medyada paylaş
-                print(f"[PAYLAŞIM] İlan {i + 1} paylaşılıyor...")
-                result = self._publish_to_social(ilan)
-                
-                # Sonucu Telegram'a bildir
-                message = self._format_result_message(ilan, result)
-                if self._send_message(message):
-                    if result.get('success'):
-                        print(f"[OK] İlan {i + 1} paylaşıldı ve bildirim gönderildi")
-                        success_count += 1
-                    else:
-                        print(f"[UYARI] İlan {i + 1} paylaşılamadı ama bildirim gönderildi")
+            # Sonucu Telegram'a bildir
+            message = self._format_result_message(ilan, result)
+            if self._send_message(message):
+                if result.get('success'):
+                    print(f"[OK] İlan {valid_index + 1} paylaşıldı ve bildirim gönderildi")
+                    return True
                 else:
-                    print(f"[HATA] İlan {i + 1} - Telegram bildirimi gönderilemedi")
-            except Exception as e:
-                print(f"[HATA] İlan {i + 1} - {e}")
-        
-        return success_count == (end_index - start_index)
+                    print(f"[UYARI] İlan {valid_index + 1} paylaşılamadı ama bildirim gönderildi")
+                    return False
+            else:
+                print(f"[HATA] İlan {valid_index + 1} - Telegram bildirimi gönderilemedi")
+                return False
+        except Exception as e:
+            print(f"[HATA] İlan {valid_index + 1} - {e}")
+            return False
 
 
 def main():
