@@ -86,24 +86,15 @@ class TelegramScheduler:
 
 
 def main():
-    """Ana fonksiyon - Saat bazlı gönderim"""
-    current_hour = datetime.now().hour
+    """Ana fonksiyon - Environment variable'dan indeks alır"""
+    import sys
     
-    # Saat bazlı ilan indeksleri (0-indexed)
-    schedule = {
-        17: (0, 2),   # 1. ve 2. ilan
-        18: (2, 2),   # 3. ve 4. ilan
-        19: (4, 2),   # 5. ve 6. ilan
-        20: (6, 2)    # 7. ve 8. ilan
-    }
+    # GitHub Actions'dan ilan indekslerini al
+    start_index = int(os.environ.get('ILAN_START_INDEX', 0))
+    count = int(os.environ.get('ILAN_COUNT', 2))
     
-    if current_hour not in schedule:
-        print(f"[BILGI] Saat {current_hour:02d}:00 için zamanlanmış gönderim yok")
-        return
-    
-    start_index, count = schedule[current_hour]
-    
-    print(f"\n[BASLANGIC] Saat {current_hour:02d}:00 - İlan {start_index + 1}-{start_index + count} gönderiliyor")
+    print(f"\n[BASLANGIC] İlan {start_index + 1}-{start_index + count} gönderiliyor")
+    print(f"[ZAMAN] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     try:
         scheduler = TelegramScheduler()

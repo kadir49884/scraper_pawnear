@@ -11,24 +11,79 @@ on:
     # 20:00 TR (17:00 UTC) - 7. ve 8. ilan
     - cron: '0 17 * * *'
   
-  workflow_dispatch: # Manuel tetikleme
+  workflow_dispatch:
+    inputs:
+      start_index:
+        description: 'Başlangıç ilan indeksi (0-indexed)'
+        required: true
+        default: '0'
+      count:
+        description: 'Gönderilecek ilan sayısı'
+        required: true
+        default: '2'
 
 jobs:
-  send-scheduled:
+  send-17:
+    if: github.event.schedule == '0 14 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    
-    - name: Send scheduled messages
+    - name: 17:00 - İlan 1-2
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        ILAN_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
+        ILAN_COUNT: ${{ github.event.inputs.count || '2' }}
+
+  send-18:
+    if: github.event.schedule == '0 15 * * *'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: 18:00 - İlan 3-4
+      run: python scheduled_telegram.py
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        ILAN_START_INDEX: '2'
+        ILAN_COUNT: '2'
+
+  send-19:
+    if: github.event.schedule == '0 16 * * *'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: 19:00 - İlan 5-6
+      run: python scheduled_telegram.py
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        ILAN_START_INDEX: '4'
+        ILAN_COUNT: '2'
+
+  send-20:
+    if: github.event.schedule == '0 17 * * *'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: 20:00 - İlan 7-8
+      run: python scheduled_telegram.py
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        ILAN_START_INDEX: '6'
+        ILAN_COUNT: '2'
 
