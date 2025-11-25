@@ -11,7 +11,9 @@ class BaseScraper(ABC):
     BLOCKED_KEYWORDS = [
         'ödeme', 'para', 'kredi kartı', 'kredi karti',
         'antiparaziter', 'iade', 'nakit', 'taksit',
-        'fiyat', 'ücret', 'ucret'
+        'fiyat', 'ücret', 'ucret', 'garantili',
+        'anne sütü', 'anne sutu', 'kaliteli',
+        'yavru alirken', 'gönderim', 'gonderim'
     ]
     
     def __init__(self, name: str):
