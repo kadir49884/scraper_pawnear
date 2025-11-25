@@ -7,6 +7,13 @@ from datetime import datetime, timedelta
 import re
 
 class BaseScraper(ABC):
+    # İstenmeyen kelimeler (küçük harfe çevrilecek)
+    BLOCKED_KEYWORDS = [
+        'ödeme', 'para', 'kredi kartı', 'kredi karti',
+        'antiparaziter', 'iade', 'nakit', 'taksit',
+        'fiyat', 'ücret', 'ucret'
+    ]
+    
     def __init__(self, name: str):
         self.name = name
         self.headers = {
@@ -63,6 +70,17 @@ class BaseScraper(ABC):
         except:
             return datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
     
+    def _contains_blocked_keywords(self, text: str) -> bool:
+        """Metinde istenmeyen kelime var mı kontrol et"""
+        if not text:
+            return False
+        
+        text_lower = text.lower()
+        for keyword in self.BLOCKED_KEYWORDS:
+            if keyword in text_lower:
+                return True
+        return False
+    
     def get_last_24_hours_ads(self, listings: List[Dict]) -> List[Dict]:
         """
         Son 24 saat içindeki ilanları filtrele ve detayları al
@@ -83,6 +101,14 @@ class BaseScraper(ABC):
                 # Detayları al
                 detailed_ad = self.extract_details(ad)
                 if detailed_ad:
+                    # İstenmeyen kelime kontrolü
+                    baslik = detailed_ad.get('baslik', '')
+                    aciklama = detailed_ad.get('aciklama', '')
+                    
+                    if self._contains_blocked_keywords(baslik) or self._contains_blocked_keywords(aciklama):
+                        print(f"[{self.name}] Filtrelendi (istenmeyen kelime): {baslik[:50]}...")
+                        continue
+                    
                     result.append(detailed_ad)
             except Exception as e:
                 print(f"[{self.name}] Detay alma hatasi: {e}")
