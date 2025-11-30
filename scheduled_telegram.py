@@ -149,7 +149,7 @@ class SocialPublisher:
         return True
     
     def _find_valid_ilan(self, ilanlar, preferred_index):
-        """İlan bulamazsa geri geri giderek uygun ilan bul (daha önce paylaşılmamış ve geçerli görsel)"""
+        """İlan bulamazsa hem geriye hem ileriye bakarak uygun ilan bul"""
         total = len(ilanlar)
         shared = self._load_shared_ilanlar()
         
@@ -159,18 +159,26 @@ class SocialPublisher:
             if self._is_valid_image(ilan.get('gorsel', '')):
                 return preferred_index
             else:
-                print(f"[FALLBACK] İlan {preferred_index + 1} geçersiz görsel, atlanıyor...")
+                print(f"[FALLBACK] İlan {preferred_index + 1} geçersiz görsel, alternatif aranıyor...")
         
-        # Yoksa geriye doğru ara (paylaşılmamış ve geçerli görsel)
-        for i in range(preferred_index - 1, -1, -1):
-            if i < total and i not in shared:
+        # Önce ileriye bak (preferred_index + 1'den başla)
+        for i in range(preferred_index + 1, total):
+            if i not in shared:
                 ilan = ilanlar[i]
                 if self._is_valid_image(ilan.get('gorsel', '')):
-                    print(f"[FALLBACK] İlan {preferred_index + 1} uygun değil, İlan {i + 1} kullanılıyor")
+                    print(f"[FALLBACK] İlan {i + 1} kullanılıyor (ileriye bakıldı)")
+                    return i
+        
+        # Sonra geriye bak
+        for i in range(preferred_index - 1, -1, -1):
+            if i not in shared:
+                ilan = ilanlar[i]
+                if self._is_valid_image(ilan.get('gorsel', '')):
+                    print(f"[FALLBACK] İlan {i + 1} kullanılıyor (geriye bakıldı)")
                     return i
         
         # Hiç uygun ilan yoksa
-        print(f"[UYARI] Paylaşılabilir ilan bulunamadı")
+        print(f"[UYARI] Paylaşılabilir geçerli ilan bulunamadı")
         return None
     
     def publish_scheduled_ilanlar(self, start_index, count=1):
