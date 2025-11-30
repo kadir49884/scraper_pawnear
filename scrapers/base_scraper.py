@@ -13,7 +13,23 @@ class BaseScraper(ABC):
         'antiparaziter', 'iade', 'nakit', 'taksit',
         'fiyat', 'ücret', 'ucret', 'garantili',
         'anne sütü', 'anne sutu', 'kaliteli',
-        'yavru alirken', 'gönderim', 'gonderim'
+        'yavru alirken', 'gönderim', 'gonderim',
+        'teslime hazır', 'teslime hazir', 'elden teslim',
+        'sorunsuz gönderim', 'sorunsuz gonderim',
+        'canlı çeşitlerimiz', 'canli cesitlerimiz',
+        'bizi ziyaret', 'görüntülü arayabilirsiniz', 'goruntulu arayabilirsiniz',
+        'önde gelen', 'onde gelen', 'köpek üretim', 'kopek uretim',
+        'üretim çiftliği', 'uretim ciftligi', 'en büyük', 'en buyuk',
+        'en prestijli', 'sektörde lider', 'sektorde lider',
+        'modern tesisleri', 'deneyimli ekibi', 'deneyimli ekip',
+        'yüksek standartlarla', 'yuksek standartlarla',
+        'dünyaca ünlü', 'dunyaca unlu', 'popüler köpek', 'populer kopek',
+        'sizleri davet', 'çiftliğimize bekliyoruz', 'ciftigimize bekliyoruz',
+        'ruhsatlı çiftlik', 'ruhsatli ciftlik',
+        'birbirinden güzel', 'birbirinden guzel',
+        'brinirinden güzel', 'brinirinden guzel',
+        'sevimli yavrular', 'çok sevimli', 'cok sevimli',
+        'şecereli', 'secereli'
     ]
     
     def __init__(self, name: str):
