@@ -2,13 +2,13 @@ name: Zamanlanmış Telegram Mesajları
 
 on:
   schedule:
-    # 17:00 TR (14:00 UTC) - 1. ve 2. ilan
-    - cron: '0 14 * * *'
-    # 18:00 TR (15:00 UTC) - 3. ve 4. ilan
+    # 13:00 TR (10:00 UTC) - 1. ilan
+    - cron: '0 10 * * *'
+    # 18:00 TR (15:00 UTC) - 11. ilan
     - cron: '0 15 * * *'
-    # 19:00 TR (16:00 UTC) - 5. ve 6. ilan
+    # 19:00 TR (16:00 UTC) - 21. ilan
     - cron: '0 16 * * *'
-    # 20:00 TR (17:00 UTC) - 7. ve 8. ilan
+    # 20:00 TR (17:00 UTC) - 31. ilan
     - cron: '0 17 * * *'
   
   workflow_dispatch:
@@ -23,15 +23,15 @@ on:
         default: '2'
 
 jobs:
-  send-17:
-    if: github.event.schedule == '0 14 * * *' || github.event_name == 'workflow_dispatch'
+  send-13:
+    if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: 17:00 - İlan 1
+    - name: 13:00 - İlan 1
       run: python scheduled_telegram.py
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
