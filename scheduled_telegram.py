@@ -133,23 +133,44 @@ class SocialPublisher:
             error = result.get('error', 'Bilinmeyen hata')
             return f"❌ PAYLAŞIM BAŞARISIZ\n\n📝 {baslik}\n\n🚫 Hata: {error}"
     
+    def _is_valid_image(self, url):
+        """Görsel URL'i kontrol et (404 değilse geçerli)"""
+        if not url:
+            return False
+        
+        # 404.png içeren URL'ler geçersiz
+        if '404.png' in url.lower() or '404.jpg' in url.lower():
+            return False
+        
+        # Default/placeholder görseller
+        if 'default' in url.lower() or 'placeholder' in url.lower():
+            return False
+        
+        return True
+    
     def _find_valid_ilan(self, ilanlar, preferred_index):
-        """İlan bulamazsa geri geri giderek uygun ilan bul (daha önce paylaşılmamış)"""
+        """İlan bulamazsa geri geri giderek uygun ilan bul (daha önce paylaşılmamış ve geçerli görsel)"""
         total = len(ilanlar)
         shared = self._load_shared_ilanlar()
         
-        # İstenen indeks varsa ve paylaşılmamışsa direkt döndür
+        # İstenen indeks varsa ve paylaşılmamışsa ve görseli geçerliyse direkt döndür
         if preferred_index < total and preferred_index not in shared:
-            return preferred_index
+            ilan = ilanlar[preferred_index]
+            if self._is_valid_image(ilan.get('gorsel', '')):
+                return preferred_index
+            else:
+                print(f"[FALLBACK] İlan {preferred_index + 1} geçersiz görsel, atlanıyor...")
         
-        # Yoksa geriye doğru ara (paylaşılmamış ilan bul)
+        # Yoksa geriye doğru ara (paylaşılmamış ve geçerli görsel)
         for i in range(preferred_index - 1, -1, -1):
             if i < total and i not in shared:
-                print(f"[FALLBACK] İlan {preferred_index + 1} paylaşılmış/yok, İlan {i + 1} kullanılıyor")
-                return i
+                ilan = ilanlar[i]
+                if self._is_valid_image(ilan.get('gorsel', '')):
+                    print(f"[FALLBACK] İlan {preferred_index + 1} uygun değil, İlan {i + 1} kullanılıyor")
+                    return i
         
-        # Hiç paylaşılmamış ilan yoksa
-        print(f"[UYARI] Tüm ilanlar zaten paylaşılmış")
+        # Hiç uygun ilan yoksa
+        print(f"[UYARI] Paylaşılabilir ilan bulunamadı")
         return None
     
     def publish_scheduled_ilanlar(self, start_index, count=1):
