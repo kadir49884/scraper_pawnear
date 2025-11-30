@@ -93,6 +93,9 @@ class SocialPublisher:
             "platforms": ["facebook", "twitter", "instagram"]
         }
         
+        print(f"[DEBUG] API'ye gönderiliyor: baslik={payload['baslik'][:50]}...")
+        print(f"[DEBUG] Görsel URL: {payload['gorsel']}")
+        
         req = urllib.request.Request(
             self.API_URL,
             data=json.dumps(payload).encode('utf-8'),
@@ -102,8 +105,14 @@ class SocialPublisher:
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
                 result = json.loads(response.read().decode('utf-8'))
+                print(f"[DEBUG] API Yanıt: {result}")
                 return result
+        except urllib.error.HTTPError as e:
+            error_msg = e.read().decode('utf-8') if e.fp else str(e)
+            print(f"[HATA] HTTP {e.code}: {error_msg}")
+            return {"success": False, "error": f"HTTP {e.code}: {error_msg}"}
         except Exception as e:
+            print(f"[HATA] API Hatası: {str(e)}")
             return {"success": False, "error": str(e)}
     
     def _format_result_message(self, ilan, result):
