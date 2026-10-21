@@ -1,15 +1,16 @@
 name: Zamanlanmış Telegram Mesajları
 
 on:
-  schedule:
-    # 13:00 TR (10:00 UTC) - 1. ilan
-    - cron: '0 10 * * *'
-    # 18:00 TR (15:00 UTC) - 11. ilan
-    - cron: '0 15 * * *'
-    # 19:00 TR (16:00 UTC) - 21. ilan
-    - cron: '0 16 * * *'
-    # 20:00 TR (17:00 UTC) - 31. ilan
-    - cron: '0 17 * * *'
+  # Otomatik paylaşım durduruldu (kullanıcı isteği). Tekrar açmak için aşağıdaki satırların başındaki # işaretlerini kaldırın.
+  # schedule:
+  #   # 13:00 TR (10:00 UTC) - 1. ilan
+  #   - cron: '0 10 * * *'
+  #   # 18:00 TR (15:00 UTC) - 11. ilan
+  #   - cron: '0 15 * * *'
+  #   # 19:00 TR (16:00 UTC) - 21. ilan
+  #   - cron: '0 16 * * *'
+  #   # 20:00 TR (17:00 UTC) - 31. ilan
+  #   - cron: '0 17 * * *'
   
   workflow_dispatch:
     inputs:
